@@ -73,6 +73,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Qwnzy-GKI-Kernel-Zip
-          path: Qwnzy-GKI-
-          Kernel.zip
+          path: Qwnzy-GKI-Kernel.zip
 
