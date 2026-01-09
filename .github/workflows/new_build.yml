@@ -1,0 +1,76 @@
+name: Build Kernel Qwnzy
+
+# This workflow is triggered manually
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Qwnzy GKI Kernel
+    runs-on: ubuntu-20.04 # Using a specific, stable version
+    steps:
+      - name: Initializing environment
+        uses: actions/checkout@v3
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+
+      - name: Clone Toolchain (Proton Clang)
+        run: git clone --depth=1 https://github.com/kdrag0n/proton-clang.git clang-llvm
+
+      - name: Clone Kernel Source
+        run: git clone --depth=1 https://github.com/ztc1997/android_gki_kernel_5.10_common.git kernel
+
+      - name: Clone AnyKernel3
+        run: git clone --depth=1 https://github.com/osm0sis/AnyKernel3.git
+
+      - name: Setup Build Environment & Start Build
+        env:
+          # Set environment variables for the build
+          ARCH: arm64
+          SUBARCH: arm64
+          KBUILD_BUILD_USER: "Qwnzy"
+          KBUILD_BUILD_HOST: "GitHub-Actions"
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          # Add toolchain to PATH
+          export PATH="$GITHUB_WORKSPACE/clang-llvm/bin:$PATH"
+          
+          # Move into kernel directory
+          cd kernel
+
+          # --- CONFIGURATION ---
+          # 1. Create the base config
+          make O=out gki_defconfig
+          
+          # 2. Silently accept defaults for any new options
+          make O=out olddefconfig
+
+          # 3. Apply custom patches as requested
+          echo "CONFIG_SUSFS=y" >> out/.config
+          echo "CONFIG_SUSPEND=y" >> out/.config # susfs often depends on this
+
+          # --- THE BUILD ---
+          # Unset conflicting host system variables and run the build
+          unset CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH LIBRARY_PATH
+          make O=out -j$(nproc) CC=clang HOSTCC=clang HOSTCXX=clang++ LD=ld.lld
+
+      - name: Package Kernel into Flashable Zip
+        run: |
+          # Copy the compiled kernel image to the AnyKernel3 directory
+          cp kernel/out/arch/arm64/boot/Image.gz AnyKernel3/
+          
+          # Modify the AnyKernel3 script to show your kernel name
+          sed -i 's/kernel.string=.*/kernel.string=Qwnzy-GKI by Qwnzy/g' AnyKernel3/anykernel.sh
+          
+          # Create the flashable zip
+          cd AnyKernel3
+          zip -r9 ../Qwnzy-GKI-Kernel.zip * -x ".git*" "LICENSE" "README.md"
+
+      - name: Upload Kernel Zip as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Qwnzy-GKI-Kernel-Zip
+          path: Qwnzy-GKI-Kernel.zip
