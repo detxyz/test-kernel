@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build Qwnzy GKI Kernel
-    runs-on: ubuntu-20.04 # Using a specific, stable version
+    runs-on: ubuntu-latest # Using a specific, stable version
     steps:
       - name: Initializing environment
         uses: actions/checkout@v3
