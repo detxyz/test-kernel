@@ -1,0 +1,10 @@
+
+/kernel/
+/clang-llvm/
+/AnyKernel3/
+
+# Ignore local build environment script
+/setup_env.sh
+
+# Ignore packaged zip files
+*.zip
