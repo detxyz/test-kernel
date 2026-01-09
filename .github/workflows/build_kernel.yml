@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build Qwnzy GKI Kernel
-    runs-on: ubuntu-20.04 # Using a specific, stable version
+    runs-on: ubuntu-latest # Using a specific, stable version
     steps:
       - name: Initializing environment
         uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
           zip -r9 ../Qwnzy-GKI-Kernel.zip * -x ".git*" "LICENSE" "README.md"
 
       - name: Upload Kernel Zip as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Qwnzy-GKI-Kernel-Zip
           path: Qwnzy-GKI
