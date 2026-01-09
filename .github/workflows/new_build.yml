@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest # Using a specific, stable version
     steps:
       - name: Initializing environment
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Install build dependencies
         run: |
@@ -70,7 +70,7 @@ jobs:
           zip -r9 ../Qwnzy-GKI-Kernel.zip * -x ".git*" "LICENSE" "README.md"
 
       - name: Upload Kernel Zip as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Qwnzy-GKI-Kernel-Zip
           path: Qwnzy-GKI-Kernel.zip
